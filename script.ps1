@@ -1,4 +1,4 @@
-﻿$ver = "0.0.5"
+﻿$ver = "0.0.6"
 $ProgrammName = "Agent"
 function Get-IniContent ($filePath) {
     ##Parsing file ini file, function returns an array $ini. We call the function:on:$ini = Get-IniContent ".\\config.ini"
