@@ -18,8 +18,8 @@ function global:Update {
             Remove-Item $zipPath
     
             # update
-            #Copy-Item -Path ".\temp\powershell_agent-$latestVersion\*" -Destination ".\" -Recurse -Force
-            # Remove-Item ".\temp" -Recurse -Force
+            Copy-Item -Path ".\temp\powershell_agent-$latestVersion\*" -Destination ".\" -Recurse -Force
+            Remove-Item ".\temp" -Recurse -Force
             return $updateResult = 1
         }
         elseif ($latestVersion -eq $ver) {
