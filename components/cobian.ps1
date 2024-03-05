@@ -11,7 +11,7 @@ function global:Cobian {
     $date = get-date -uformat "%Y-%m-%d"
     $filelog = $cobianfolderlog + 'log ' + $date + '.txt'
     $time = $ini.cobian.time
-    $pattern = "Ошибок: 0"
+    $pattern = "Ошибок: 0,"
     $text, $errbackup, $errorpattern = Findpattern $filelog $n $time $pattern $debug 
     return  $text, $errbackup, $errorpattern
 }
