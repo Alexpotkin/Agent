@@ -82,6 +82,23 @@ function SendMessageTelegram {
         Debuging -param_debug $debug -debugmessage ("Error sending a message to the server.Error : " + $PSItem) -typemessage error
     }  
 }
+
+function SendServer {
+    #Sending message to the telegram
+    #84.52.98.118:50000/add?name=User_1&group=Group_1
+    try {
+        #$ID = SaveloadID
+        $URL_get = 'http://84.52.98.118:50000/'
+        $response = Invoke-WebRequest -Uri "http://84.52.98.118:50000/" -UseBasicParsing
+        $reader = New-Object System.IO.StreamReader($response.RawContentStream, [System.Text.Encoding]::UTF8)
+        $str = $reader.ReadToEnd()
+        Debuging -param_debug $debug -debugmessage ($str) -typemessage completed -anyway_log $True
+    }
+    catch {
+        Debuging -param_debug $debug -debugmessage ("Error respons server") -typemessage error
+    }  
+}
+
 function SaveloadID {
     $filePath = ".\ID.txt"
     if (Test-Path $filePath) {
@@ -161,7 +178,7 @@ function Findpattern {
 }
 
 
-$ID = SaveloadID
+SendServer 
 
 ####COMPONENT COBIAN####
 if (($ini.cobian.cobian -eq 1) -or ([int16]$ini.cobian.time -lt 1)) {
