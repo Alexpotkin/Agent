@@ -84,18 +84,22 @@ function SendMessageTelegram {
 }
 
 function SendServer {
-    #Sending message to the telegram
-    #84.52.98.118:50000/add?name=User_1&group=Group_1
     try {
-        #$ID = SaveloadID
-        $URL_get = 'http://84.52.98.118:50000/'
-        $response = Invoke-WebRequest -Uri "http://84.52.98.118:50000/" -UseBasicParsing
-        $reader = New-Object System.IO.StreamReader($response.RawContentStream, [System.Text.Encoding]::UTF8)
-        $str = $reader.ReadToEnd()
-        Debuging -param_debug $debug -debugmessage ($str) -typemessage completed -anyway_log $True
+        $ver = "1"
+        $uri = "http://84.52.98.118:50000/event"
+        $message = "БЛА БЛА БЛА"
+        $payload = @{
+            "message"    = $message;
+            "ver"       = $ver;
+            "parse_mode" = 'HTML';
+        }
+        $request = Invoke-RestMethod -Uri $uri -Method Post -ContentType "application/json;charset=utf-8" `
+            -Body (ConvertTo-Json -Compress -InputObject $payload)  | Out-Null 
+        Debuging -param_debug $debug -debugmessage $request  -typemessage error
+        write-host $request
     }
     catch {
-        Debuging -param_debug $debug -debugmessage ("Error respons server") -typemessage error
+        Debuging -param_debug $debug -debugmessage ("Error sending a message to the server.Error : " + $PSItem) -typemessage error
     }  
 }
 
