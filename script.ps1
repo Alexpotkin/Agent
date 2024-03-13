@@ -1,5 +1,7 @@
 ﻿$global:ver = "0.1.0"
 $ProgrammName = "Agent"
+$errorflag=$false
+$warningflag = $false
 function Get-IniContent ($filePath) {
     ##Parsing file ini file, function returns an array $ini. We call the function:on:$ini = Get-IniContent ".\\config.ini"
     ## The array of keys $ ini contains the name of the section, the name of the key and meaning.example ($chatid = $ini.main.chatid)
@@ -68,7 +70,7 @@ function SendMessageTelegram {
     ) 
     try {
         $message = $message + " ver. " + $ver + " Error: " + $errorflag + " Warn: " + $warningflag
-        Debuging -param_debug $debug -debugmessage ("Inclusive parameters for sending a message: " + $message) -typemessage info
+        Debuging -param_debug $debug -debugmessage ("Inclusive parameters for sending a message: " + $message) -typemessage info -anyway_log $True
         $payload = @{
             "chat_id"    = $chatid;
             "text"       = "Name: $name" + ' ' + "Message: $message";
@@ -76,10 +78,10 @@ function SendMessageTelegram {
         }
         Invoke-WebRequest -Uri ("https://api.telegram.org/bot{0}/sendMessage" `
                 -f $token) -Method Post -ContentType "application/json;charset=utf-8" `
-            -Body (ConvertTo-Json  -Compress -InputObject $payload)  | Out-Null
+            -Body (ConvertTo-Json  -Compress -InputObject $payload) -UseBasicParsing  | Out-Null
     }
     catch {
-        Debuging -param_debug $debug -debugmessage ("Error sending a message to the server.Error : " + $PSItem) -typemessage error
+        Debuging -param_debug $debug -debugmessage ("Error sending a message to telegram.Error : " + $PSItem) -typemessage error
     }  
 }
 
@@ -98,11 +100,11 @@ function SendServer {
             "ver"         = $ver;
         } 
         $request = Invoke-RestMethod -Uri $uri -Method Post -ContentType "application/json;charset=utf-8" `
-            -Body (ConvertTo-Json  -Compress -InputObject $payload)
-        Debuging -param_debug $debug -debugmessage ("request response: " + $request.status)  -typemessage error
+            -Body (ConvertTo-Json  -Compress -InputObject $payload) -UseBasicParsing
+        Debuging -param_debug $debug -debugmessage ("request response: " + $request.status)  -typemessage info -anyway_log $True
     }
     catch {
-        Debuging -param_debug $debug -debugmessage ("Error sending a message to the server 82.Error  : " + $PSItem) -typemessage error
+        Debuging -param_debug $debug -debugmessage ("Error sending message servermon. Error  : " + $PSItem) -typemessage error
     }  
 }
 
