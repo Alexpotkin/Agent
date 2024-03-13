@@ -1,4 +1,4 @@
-﻿$ver = "0.1.0"
+﻿$global:ver = "0.1.0"
 $ProgrammName = "Agent"
 function Get-IniContent ($filePath) {
     ##Parsing file ini file, function returns an array $ini. We call the function:on:$ini = Get-IniContent ".\\config.ini"
@@ -76,7 +76,7 @@ function SendMessageTelegram {
         }
         Invoke-WebRequest -Uri ("https://api.telegram.org/bot{0}/sendMessage" `
                 -f $token) -Method Post -ContentType "application/json;charset=utf-8" `
-            -Body (ConvertTo-Json -Compress -InputObject $payload)  | Out-Null
+            -Body (ConvertTo-Json  -Compress -InputObject $payload)  | Out-Null
     }
     catch {
         Debuging -param_debug $debug -debugmessage ("Error sending a message to the server.Error : " + $PSItem) -typemessage error
@@ -84,37 +84,37 @@ function SendMessageTelegram {
 }
 
 function SendServer {
+    param (
+        $message = "message is empty", $errorflag = $false, $warningflag = $false
+    )
     try {
-        $ver = "1"
         $uri = "http://84.52.98.118:50000/event"
-        $message = "БЛА БЛА БЛА"
+        $message = "54545"
         $payload = @{
+            "token" = $SaveloadID 
             "message"    = $message;
+            "errorflag" = $errorflag;
+            "warningflag" = $warningflag;
             "ver"       = $ver;
-            "parse_mode" = 'HTML';
-        }
+        } 
         $request = Invoke-RestMethod -Uri $uri -Method Post -ContentType "application/json;charset=utf-8" `
-            -Body (ConvertTo-Json -Compress -InputObject $payload)  | Out-Null 
-        Debuging -param_debug $debug -debugmessage $request  -typemessage error
-        write-host $request
+                    -Body (ConvertTo-Json  -Compress -InputObject $payload)
+        Debuging -param_debug $debug -debugmessage ("request response: " +$request.status)  -typemessage error
     }
     catch {
-        Debuging -param_debug $debug -debugmessage ("Error sending a message to the server.Error : " + $PSItem) -typemessage error
+        Debuging -param_debug $debug -debugmessage ("Error sending a message to the server 82.Error  : " + $PSItem) -typemessage error
     }  
 }
 
 function SaveloadID {
     $filePath = ".\ID.txt"
     if (Test-Path $filePath) {
-        # Файл существует, прочитать первую строку и записать в переменную
         $ID = Get-Content $filePath -TotalCount 1
     }
     else {
-        # Файл не существует, создать файл и записать туда значение
-        $ID = "66574546456hjhgj456546"   # Значение по умолчанию, если файла не существует
+        $ID = "66574546456hjhgj456546"
         Set-Content -Path $filePath -Value $ID
     }
-    # Вернуть значение переменной ID
     return $ID
 }
 
@@ -182,7 +182,6 @@ function Findpattern {
 }
 
 
-SendServer 
 
 ####COMPONENT COBIAN####
 if (($ini.cobian.cobian -eq 1) -or ([int16]$ini.cobian.time -lt 1)) {
@@ -199,6 +198,7 @@ if (($ini.cobian.cobian -eq 1) -or ([int16]$ini.cobian.time -lt 1)) {
         $errorflag = $true
     }
     SendmessageTelegram -message $text -errorflag $errorflag
+    SendServer -message $text -errorflag $errorflag
 }
 
 ####UPDATE####
