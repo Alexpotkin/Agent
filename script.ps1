@@ -91,15 +91,15 @@ function SendServer {
         $uri = "http://84.52.98.118:50000/event"
         $message = "54545"
         $payload = @{
-            "token" = $SaveloadID 
-            "message"    = $message;
-            "errorflag" = $errorflag;
+            "token"       = $SaveloadID 
+            "message"     = $message;
+            "errorflag"   = $errorflag;
             "warningflag" = $warningflag;
-            "ver"       = $ver;
+            "ver"         = $ver;
         } 
         $request = Invoke-RestMethod -Uri $uri -Method Post -ContentType "application/json;charset=utf-8" `
-                    -Body (ConvertTo-Json  -Compress -InputObject $payload)
-        Debuging -param_debug $debug -debugmessage ("request response: " +$request.status)  -typemessage error
+            -Body (ConvertTo-Json  -Compress -InputObject $payload)
+        Debuging -param_debug $debug -debugmessage ("request response: " + $request.status)  -typemessage error
     }
     catch {
         Debuging -param_debug $debug -debugmessage ("Error sending a message to the server 82.Error  : " + $PSItem) -typemessage error
@@ -164,7 +164,7 @@ function Findpattern {
     }
     #Send the line for verification if there are no errors of obtaining a line from a log or processing errors of this line!
     if ($true -ne $errbackup) {
-        if ($text  -Match  $pattern) {
+        if ($text -Match $pattern) {
             Debuging -param_debug $debug -debugmessage ($pattern + "  - found in string! " + $text) -typemessage info
             [bool]$errorpattern = $false
             $text = "Cobian task is done!"
