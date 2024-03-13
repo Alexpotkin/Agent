@@ -197,6 +197,7 @@ if (($ini.cobian.cobian -eq 1) -or ([int16]$ini.cobian.time -lt 1)) {
     $text, $errbackup, $errorpattern = Cobian $ini
     if (($True -eq $errbackup) -or ($True -eq $errorpattern)) {
         $text = "ERROR " + $text  
+        Debuging -param_debug $debug -debugmessage ("Тут заходит" +$errorflag) -typemessage completed -anyway_log $True
         $errorflag = $true
     }
     SendmessageTelegram -message $text -errorflag $errorflag
