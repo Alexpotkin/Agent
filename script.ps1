@@ -1,7 +1,9 @@
 ﻿$global:ver = "0.1.0"
 $ProgrammName = "Agent"
-$errorflag=$false
-$warningflag = $false
+[bool]$errorflag=$false
+[bool]$warningflag = $false
+[bool]$errorpattern = $false
+$text = ""
 function Get-IniContent ($filePath) {
     ##Parsing file ini file, function returns an array $ini. We call the function:on:$ini = Get-IniContent ".\\config.ini"
     ## The array of keys $ ini contains the name of the section, the name of the key and meaning.example ($chatid = $ini.main.chatid)
@@ -44,18 +46,18 @@ function Get-IniContent ($filePath) {
     }
 }
 $global:debug_error_text = ""
-$ini, $global:debug = Get-IniContent ".\config.ini" # Parsim Ini file and we get the parameters we need
+$ini, $global:debug = Get-IniContent ".\config.ini" # Parse Ini file
 function Debuging {
     param($param_debug = $false, [string]$debugmessage, [string]$typemessage = "info", [bool]$anyway_log = $false)    
     try {
-        if ($param_debug -eq $true ) {
+        if (($param_debug -eq $true) -or ($anyway_log -eq $true)) {
             write-log -message $debugmessage -type $typemessage 
             if (($typemessage -eq "error") -or ($typemessage -eq "warning")) {
-                $global:debug_error_text = $global:debug_error_text + $debugmessage
+                $global:debug_error_text = $global:debug_error_text +" "+ $debugmessage
             }
         }
-        elseif ($anyway_log -or ($typemessage -eq "error") -or ($typemessage -eq "warning")) {
-            $global:debug_error_text = $global:debug_error_text + $debugmessage
+        elseif (($typemessage -eq "error") -or ($typemessage -eq "warning")) {
+            $global:debug_error_text = $global:debug_error_text +" "+ $debugmessage
             write-log -message $debugmessage -type $typemessage
         }
     }
@@ -73,7 +75,7 @@ function SendMessageTelegram {
         Debuging -param_debug $debug -debugmessage ("Inclusive parameters for sending a message: " + $message) -typemessage info -anyway_log $True
         $payload = @{
             "chat_id"    = $chatid;
-            "text"       = "Name: $name" + ' ' + "Message: $message";
+            "text"       = "Name: $name" + '  ' + "Message: $message";
             "parse_mode" = 'HTML';
         }
         Invoke-WebRequest -Uri ("https://api.telegram.org/bot{0}/sendMessage" `
@@ -87,24 +89,32 @@ function SendMessageTelegram {
 
 function SendServer {
     param (
-        $message = "message is empty", $errorflag = $false, $warningflag = $false
+        $message = "message is empty", $errorflag = $false, $warningflag = $false, $route = "/event"
     )
     try {
-        $uri = "http://84.52.98.118:50000/event"
-        $message = "54545"
+        if ($ini.main.servermon -eq "") {
+            $uri = "http://84.52.98.118:50000/"+$route
+        }
+        else {
+            $uri = $ini.main.servermon + $route
+        }
+        $ID = SaveloadID
         $payload = @{
-            "token"       = $SaveloadID 
+            "token"       = $ID
             "message"     = $message;
-            "errorflag"   = $errorflag;
-            "warningflag" = $warningflag;
+            "errorflag"   = [System.Convert]::ToString($errorflag);
+            "warningflag" = [System.Convert]::ToString($warningflag);
             "ver"         = $ver;
         } 
         $request = Invoke-RestMethod -Uri $uri -Method Post -ContentType "application/json;charset=utf-8" `
             -Body (ConvertTo-Json  -Compress -InputObject $payload) -UseBasicParsing
-        Debuging -param_debug $debug -debugmessage ("request response: " + $request.status)  -typemessage info -anyway_log $True
+        Debuging -param_debug $debug -debugmessage ("request response: " +$request.status)  -typemessage info -anyway_log $True
+        if ($request.status -ne "ok") {
+            Debuging -param_debug $debug -debugmessage ("request response error: " + $request.status)  -typemessage error -anyway_log $True  
+        }
     }
     catch {
-        Debuging -param_debug $debug -debugmessage ("Error sending message servermon. Error  : " + $PSItem) -typemessage error
+        Debuging -param_debug $debug -debugmessage ("Error sending message servermon. Error: " + $PSItem) -typemessage error
     }  
 }
 
@@ -126,7 +136,7 @@ try {
     .\components\write-log.ps1
     write-log "$ProgrammName (ver $ver) started." 
     if ($debug) {
-        Debuging -param_debug $debug -debugmessage ("Debug options is ON") -typemessage warning
+        Debuging -param_debug $debug -debugmessage (' Debagger is ON ⚠ ') -typemessage warning
     } 
 }
 catch {	
@@ -135,7 +145,6 @@ catch {
 }
 
 ####FINDPATTERN####
-#$ComponentName = "findpattern"
 Debuging -param_debug $debug -debugmessage ("The task for checking the cobian log file is set - 1. go...") -typemessage info
 function Findpattern {
     # function pattern analizator
@@ -183,8 +192,6 @@ function Findpattern {
     return $text, $errbackup, $errorpattern
 }
 
-
-
 ####COMPONENT COBIAN####
 if (($ini.cobian.cobian -eq 1) -or ([int16]$ini.cobian.time -lt 1)) {
     try {
@@ -197,7 +204,6 @@ if (($ini.cobian.cobian -eq 1) -or ([int16]$ini.cobian.time -lt 1)) {
     $text, $errbackup, $errorpattern = Cobian $ini
     if (($True -eq $errbackup) -or ($True -eq $errorpattern)) {
         $text = "ERROR " + $text  
-        Debuging -param_debug $debug -debugmessage ("Тут заходит" +$errorflag) -typemessage completed -anyway_log $True
         $errorflag = $true
     }
     SendmessageTelegram -message $text -errorflag $errorflag
@@ -226,8 +232,6 @@ if ($ini.main.update -eq "1") {
 
 ####SEND AGENT INFO####
 if (($global:errorcount -gt 0) -or ($global:warningcount -gt 0)) {
-    $warningflag = $false
-    $errorflag = $false
     if ($global:errorcount -gt 0) {
         $errorflag = $true
     }
