@@ -1,6 +1,6 @@
 ﻿$global:ver = "0.1.0"
 $ProgrammName = "Agent"
-[bool]$errorflag=$false
+[bool]$errorflag = $false
 [bool]$warningflag = $false
 [bool]$errorpattern = $false
 $text = ""
@@ -53,11 +53,11 @@ function Debuging {
         if (($param_debug -eq $true) -or ($anyway_log -eq $true)) {
             write-log -message $debugmessage -type $typemessage 
             if (($typemessage -eq "error") -or ($typemessage -eq "warning")) {
-                $global:debug_error_text = $global:debug_error_text +" "+ $debugmessage
+                $global:debug_error_text = $global:debug_error_text + " " + $debugmessage
             }
         }
         elseif (($typemessage -eq "error") -or ($typemessage -eq "warning")) {
-            $global:debug_error_text = $global:debug_error_text +" "+ $debugmessage
+            $global:debug_error_text = $global:debug_error_text + " " + $debugmessage
             write-log -message $debugmessage -type $typemessage
         }
     }
@@ -93,41 +93,82 @@ function SendServer {
     )
     try {
         if ($ini.main.servermon -eq "") {
-            $uri = "http://84.52.98.118:50000/"+$route
+            $uri = "http://84.52.98.118:50000"
         }
         else {
-            $uri = $ini.main.servermon + $route
+            $uri = $ini.main.servermon
         }
-        $ID = SaveloadID
-        $payload = @{
-            "token"       = $ID
-            "message"     = $message;
-            "errorflag"   = [System.Convert]::ToString($errorflag);
-            "warningflag" = [System.Convert]::ToString($warningflag);
-            "ver"         = $ver;
-        } 
-        $request = Invoke-RestMethod -Uri $uri -Method Post -ContentType "application/json;charset=utf-8" `
-            -Body (ConvertTo-Json  -Compress -InputObject $payload) -UseBasicParsing
-        Debuging -param_debug $debug -debugmessage ("request response: " +$request.status)  -typemessage info -anyway_log $True
-        if ($request.status -ne "ok") {
-            Debuging -param_debug $debug -debugmessage ("request response error: " + $request.status)  -typemessage error -anyway_log $True  
+        $token = loadToken
+        if ($null -eq $token) {
+            $filecode = ".\code.txt"
+            if (Test-Path $filecode) {
+                $code = Get-Content $filecode -TotalCount 1
+                Debuging -param_debug $debug -debugmessage ("code load is file: " + $code)  -typemessage info -anyway_log $True
+                $route = "/token"
+                $uritoken = $uri + $route
+                $payload = @{
+                    "code" = [System.Convert]::ToString($code)
+                } 
+                $request = Invoke-RestMethod -Uri $uritoken -Method Post -ContentType "application/json;charset=utf-8" `
+                    -Body (ConvertTo-Json  -Compress -InputObject $payload) -UseBasicParsing
+
+                Debuging -param_debug $debug -debugmessage ("request response: " + $request)  -typemessage info
+                if ($request.status -ne "You must specify the code.") {
+                    $filePath = ".\ID.txt"
+                    Set-Content -Path $filePath -Value $request.token
+                    SendmessageTelegram -message "Устройство успешно привязано" 
+                    Clear-Content -Path $filecode
+                }
+                else {
+                    Debuging -param_debug $debug -debugmessage ("request response error: " + $request.status)  -typemessage error -anyway_log $True
+                    return
+                }
+            }
+            else {
+                Debuging -param_debug $debug -debugmessage ("Problem code")  -typemessage error -anyway_log $True
+                return
+            }   
         }
+        $token = LoadToken
+        if ($null -ne $token) {
+            Debuging -param_debug $debug -debugmessage ("Token is loaded...")  -typemessage info
+            $route = "/event"
+            $uri = $uri + $route
+            $payload = @{
+                "token"       = $token
+                "message"     = $message;
+                "errorflag"   = [System.Convert]::ToString($errorflag);
+                "warningflag" = [System.Convert]::ToString($warningflag);
+                "ver"         = $ver;
+            } 
+            $request = Invoke-RestMethod -Uri $uri -Method Post -ContentType "application/json;charset=utf-8" `
+                -Body (ConvertTo-Json  -Compress -InputObject $payload) -UseBasicParsing
+            Debuging -param_debug $debug -debugmessage ("request response: " + $request.status)  -typemessage info -anyway_log $True
+            if ($request.status -ne "ok") {
+                Debuging -param_debug $debug -debugmessage ("request response error: " + $request.status)  -typemessage error -anyway_log $True 
+            }
+        }
+        
     }
     catch {
         Debuging -param_debug $debug -debugmessage ("Error sending message servermon. Error: " + $PSItem) -typemessage error
     }  
 }
 
-function SaveloadID {
+function LoadToken {
     $filePath = ".\ID.txt"
     if (Test-Path $filePath) {
-        $ID = Get-Content $filePath -TotalCount 1
+        $token = Get-Content $filePath -First 1
+        if ([string]::IsNullOrWhiteSpace($token)) {
+            $token = $null
+        }
     }
     else {
-        $ID = "66574546456hjhgj456546"
-        Set-Content -Path $filePath -Value $ID
+        $token = $null
+        Debuging -param_debug $debug -debugmessage ("Error read token is file") -typemessage warning
+
     }
-    return $ID
+    return $token
 }
 
 ####LOG WRITE####
