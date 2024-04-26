@@ -1,4 +1,4 @@
-﻿$global:ver = "0.2.0"
+﻿$global:ver = "0.2.1"
 $ProgrammName = "Agent"
 [bool]$errorflag = $false
 [bool]$warningflag = $false
@@ -91,6 +91,10 @@ function SendServer {
     param (
         $message = "message is empty", $errorflag = $false, $warningflag = $false, $route = "/event"
     )
+    if ($ini.main.telemetr -eq "0") {
+        Debuging -param_debug $debug -debugmessage ("Телеметрия отключена в файле конфигурации") -typemessage warning
+        return
+    }
     try {
         if ($ini.main.servermon -eq "") {
             $uri = "http://84.52.98.118:50000"
@@ -132,20 +136,21 @@ function SendServer {
         $token = LoadToken
         if ($null -ne $token) {
             Debuging -param_debug $debug -debugmessage ("Token is loaded...")  -typemessage info
+            $headers = @{
+                "token" = $token;
+            }
             $route = "/event"
             $uri = $uri + $route
             $payload = @{
-                "token"       = $token
                 "message"     = $message;
-                "errorflag"   = [System.Convert]::ToString($errorflag);
-                "warningflag" = [System.Convert]::ToString($warningflag);
-                "ver"         = $ver;
+                "error"   = $errorflag;
+                "warning" = $warningflag;
+                "version"         = $ver;
             } 
-            $request = Invoke-RestMethod -Uri $uri -Method Post -ContentType "application/json;charset=utf-8" `
-                -Body (ConvertTo-Json  -Compress -InputObject $payload) -UseBasicParsing
+            $request = Invoke-RestMethod -Uri $uri -Method Post -ContentType "application/json;charset=utf-8"  -Headers $headers -Body (ConvertTo-Json  -Compress -InputObject $payload) -UseBasicParsing  
             Debuging -param_debug $debug -debugmessage ("request response: " + $request.status)  -typemessage info -anyway_log $True
             if ($request.status -ne "ok") {
-                Debuging -param_debug $debug -debugmessage ("request response error: " + $request.status)  -typemessage error -anyway_log $True 
+                Debuging -param_debug $debug -debugmessage ("request response error: " + $request.status + $request.message)  -typemessage error -anyway_log $True 
             }
         }
         
