@@ -108,18 +108,17 @@ function SendServer {
             if (Test-Path $filecode) {
                 $code = Get-Content $filecode -TotalCount 1
                 Debuging -param_debug $debug -debugmessage ("code load is file: " + $code)  -typemessage info -anyway_log $True
-                $route = "/token"
+                $route = "/registration"
                 $uritoken = $uri + $route
                 $payload = @{
-                    "code" = [System.Convert]::ToString($code)
+                    "code" = $code.ToString()
                 } 
-                $request = Invoke-RestMethod -Uri $uritoken -Method Post -ContentType "application/json;charset=utf-8" `
-                    -Body (ConvertTo-Json  -Compress -InputObject $payload) -UseBasicParsing
+                $request = Invoke-RestMethod -Uri $uritoken -Method Post -ContentType "application/json;charset=utf-8"  -Headers $headers -Body (ConvertTo-Json  -Compress -InputObject $payload) -UseBasicParsing
 
                 Debuging -param_debug $debug -debugmessage ("request response: " + $request)  -typemessage info
-                if ($request.status -ne "You must specify the code.") {
+                if ($request.status -eq "ok") {
                     $filePath = ".\ID.txt"
-                    Set-Content -Path $filePath -Value $request.token
+                    Set-Content -Path $filePath -Value $request.message
                     SendmessageTelegram -message "Устройство успешно привязано" 
                     Clear-Content -Path $filecode
                 }
