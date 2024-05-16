@@ -1,4 +1,4 @@
-﻿$global:ver = "0.3.1"
+﻿$global:ver = "0.3.2"
 $ProgrammName = "Agent"
 [bool]$errorflag = $false
 [bool]$warningflag = $false
@@ -71,7 +71,17 @@ function SendMessageTelegram {
         $message = "message is empty", $token = $ini.main.token, $chatid = $ini.main.chatid, $name = $ini.main.name, $errorflag = $false, $warningflag = $false
     ) 
     try {
-        $message = $message + " ver. " + $ver + " Error: " + $errorflag + " Warn: " + $warningflag
+        if ($errorflag) {
+            $sErrorText = " ❌ "
+        } else {
+            $sErrorText =  " ✅ "
+        }
+        if ($warningflag) {
+            $sWarningText = " warning ⚠️ "
+        } else {
+            $sWarningText  = " " 
+        }
+        $message = $message + " ver. " + $ver  + $sErrorText + $sWarningText
         Debuging -param_debug $debug -debugmessage ("Inclusive parameters for sending a message: " + $message) -typemessage info -anyway_log $True
         $payload = @{
             "chat_id"    = $chatid;
