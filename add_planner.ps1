@@ -12,7 +12,7 @@ if (-not ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdent
     break
 }
 else {
-    $time = New-TimeSpan -Minutes 5
+    $time = New-TimeSpan -Minutes 60
     # Проверяем, установлен ли модуль ScheduledTasks
         if (-not (Get-Module -ListAvailable -Name ScheduledTasks)) {
             Write-Host "Модуль ScheduledTasks не найден. Установите его с помощью Install-Module -Name ScheduledTasks -Scope CurrentUser -Force"
