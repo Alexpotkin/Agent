@@ -12,6 +12,12 @@ function global:Cobian {
     $filelog = $cobianfolderlog + 'log ' + $date + '.txt'
     $time = $ini.cobian.time
     $pattern = "Ошибок: 0,"
-    $text, $errbackup, $errorpattern = Findpattern $filelog $n $time $pattern $debug 
+    $text, $errbackup, $errorpattern = Findpattern $filelog $n $time $pattern 
+    if ($true -eq $errorpattern) {
+        $n = -1..-1
+        $pattern = "Добро пожаловать в Cobian Backup"
+        $text, $errbackup, $errorpattern = Findpattern $filelog $n $time
+        $text = "Добро пожаловать в Cobian Backup. Сервис успешно запущен!"
+    }
     return  $text, $errbackup, $errorpattern
 }

@@ -3,7 +3,8 @@ $ProgrammName = "Agent"
 [bool]$errorflag = $false
 [bool]$warningflag = $false
 [bool]$errorpattern = $false
-$text = ""
+[string]$text = " "
+[string]$message = " "
 function Get-IniContent ($filePath) {
     ##Parsing file ini file, function returns an array $ini. We call the function:on:$ini = Get-IniContent ".\\config.ini"
     ## The array of keys $ ini contains the name of the section, the name of the key and meaning.example ($chatid = $ini.main.chatid)
@@ -207,9 +208,9 @@ function Findpattern {
     try {
         #Reading file
         if (((Get-Date) - (Get-ChildItem $filelog).LastWriteTime).TotalMinutes -gt $time) {
-            Debuging -param_debug $debug -debugmessage ("For the last - " + $time + " time there are no changes in the log: " + $filelog) -typemessage info -anyway_log $true 
-            $text = "For the last " + $time + " time there are no changes in the log. Check backup parameters !!!"
+            $text = "For the last time there are no changes in the log. Check backup parameters !!!"
             $errbackup = $true
+            $errorpattern = $false
         }
         else {
             Debuging -param_debug $debug -debugmessage "Reading log-file ..." -typemessage info
@@ -232,11 +233,11 @@ function Findpattern {
     if ($true -ne $errbackup) {
         if ($text -Match $pattern) {
             Debuging -param_debug $debug -debugmessage ($pattern + "  - found in string! " + $text) -typemessage info
-            [bool]$errorpattern = $false
+            $errorpattern = $false
             $text = "Cobian task is done!"
         }
         else {
-            [bool]$errorpattern = $true
+            $errorpattern = $true
             Debuging -param_debug $debug -debugmessage ($pattern + " - not found in string " + $text) -typemessage info
         }
     }
@@ -257,6 +258,7 @@ if (($ini.cobian.cobian -eq 1) -or ([int16]$ini.cobian.time -lt 1)) {
         Debuging -param_debug $debug -debugmessage $text -typemessage error
     }
     $text, $errbackup, $errorpattern = Cobian $ini
+
     if (($True -eq $errbackup) -or ($True -eq $errorpattern)) {
         $text = "ERROR " + $text  
         $errorflag = $true
