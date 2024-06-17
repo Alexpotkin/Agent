@@ -1,4 +1,4 @@
-﻿$global:ver = "0.3.2"
+﻿$global:ver = "0.3.3"
 $ProgrammName = "Agent"
 [bool]$errorflag = $false
 [bool]$warningflag = $false
@@ -74,15 +74,17 @@ function SendMessageTelegram {
     try {
         if ($errorflag) {
             $sErrorText = " ❌ "
-        } else {
-            $sErrorText =  " ✅ "
+        }
+        else {
+            $sErrorText = " ✅ "
         }
         if ($warningflag) {
             $sWarningText = " warning ⚠️ "
-        } else {
-            $sWarningText  = " " 
         }
-        $message = $message + " ver. " + $ver  + $sErrorText + $sWarningText
+        else {
+            $sWarningText = " " 
+        }
+        $message = $message + " ver. " + $ver + $sErrorText + $sWarningText
         Debuging -param_debug $debug -debugmessage ("Inclusive parameters for sending a message: " + $message) -typemessage info -anyway_log $True
         $payload = @{
             "chat_id"    = $chatid;
@@ -152,10 +154,10 @@ function SendServer {
             $route = "/event"
             $uri = $uri + $route
             $payload = @{
-                "message"     = $message;
+                "message" = $message;
                 "error"   = $errorflag;
                 "warning" = $warningflag;
-                "version"         = $ver;
+                "version" = $ver;
             } 
             $request = Invoke-RestMethod -Uri $uri -Method Post -ContentType "application/json;charset=utf-8"  -Headers $headers -Body (ConvertTo-Json  -Compress -InputObject $payload) -UseBasicParsing  
             Debuging -param_debug $debug -debugmessage ("request response: " + $request.status)  -typemessage info -anyway_log $True
