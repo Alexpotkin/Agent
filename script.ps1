@@ -1,4 +1,4 @@
-﻿$global:ver = "0.3.3"
+﻿$global:ver = "0.3.4"
 $ProgrammName = "Agent"
 [bool]$errorflag = $false
 [bool]$warningflag = $false
