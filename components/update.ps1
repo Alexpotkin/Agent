@@ -35,7 +35,7 @@ function global:Update {
         Expand-Archive -Path $zipPath -DestinationPath ".\temp" -Force
         Remove-Item $zipPath
         
-        Copy-Item -Path ".\temp\agent-$latestVersion\*" -Destination ".\" - Recurse -Force
+        Copy-Item -Path ".\temp\agent-$latestVersion\*" -Destination ".\" -Recurse -Force
         Remove-Item ".\temp" -Recurse -Force
         return $updateResult = 1
         
