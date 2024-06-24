@@ -23,7 +23,7 @@ function global:Update {
         else {
             $latestVersion = $latestRelease.tag_name
             $updateType = "релизная"
-            $zipUrl = $latestRelease.zipball_url
+            $zipUrl = "https://github.com/Alexpotkin/Agent/archive/refs/tags/" + $latestRelease.tag_name + ".zip"
 
             if (-not $zipUrl) {
                 throw "Не удалось найти URL для релизной версии."
@@ -36,7 +36,7 @@ function global:Update {
         Remove-Item $zipPath
         
         Copy-Item -Path ".\temp\agent-$latestVersion\*" -Destination ".\" -Recurse -Force
-        Remove-Item ".\temp" -Recurse -Force
+        ## Remove-Item ".\temp" -Recurse -Force
         return $updateResult = 1
         
         if ($latestVersion -eq $ver) {
