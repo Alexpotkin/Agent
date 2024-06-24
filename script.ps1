@@ -282,14 +282,18 @@ if ($ini.main.update -eq "1") {
     $updateResult = Update $ini $ver
 
     if ($updateResult -eq 1) {
-        Debuging -param_debug $debug -debugmessage ("Update downloaded! ") -typemessage completed -anyway_log $true
+        Debuging -param_debug $debug -debugmessage ("Update downloaded! ") 
+        -typemessage completed -anyway_log $true
+        $text = "The update has been successfully completed!"
+        SendmessageTelegram -message $text 
+        SendServer -message $text 
     }
     elseif ($updateResult -eq 2) {
         Debuging -param_debug $debug -debugmessage ("ERROR updateted script!") -typemessage warning -anyway_log $true
     }
 }
 
-####SEND AGENT INFO####
+###SEND AGENT INFO###
 if (($global:errorcount -gt 0) -or ($global:warningcount -gt 0)) {
     if ($global:errorcount -gt 0) {
         $errorflag = $true

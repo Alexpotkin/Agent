@@ -1,4 +1,10 @@
 #$ComponentName = "update"
+<#
+Returns:
+1 - Update successful
+0 - Script version up to date
+2 - Error occurred during update
+#>
 function global:Update {
     # function updater
     param($ini, $ver)
