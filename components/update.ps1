@@ -1,58 +1,51 @@
 function global:Update {
-    <#
-    Returns:
-    1 - Update successful
-    0 - Script version up to date
-    2 - Error occurred during update
-    #>
-
+    # функция обновления
     param($ini, $ver)
-
-    $repoUrl = "https://github.com/Alexpotkin/Agent"         # URL GitHub
-    $updateSetting = $ini.main.update                              # Получаем значение из ini файла
-
+    $repoUrl = "https://api.github.com/repos/Alexpotkin/Agent/releases"
+    
     try {
-        if ($updateSetting -eq 2) {
-            $repoUrlApi = "https://api.github.com/repos/Alexpotkin/Agent/releases"
+        $response = Invoke-RestMethod -Uri $repoUrl
+        
+        $latestRelease = $response | Where-Object { -not $_.prerelease } | Sort-Object -Property published_at -Descending | Select-Object -First 1
+        $latestPreRelease = $response | Where-Object { $_.prerelease } | Sort-Object -Property published_at -Descending | Select-Object -First 1
+        
+        # Определение URL для установки в зависимости от значения $ini.main.update
+        if ($ini.main.update -eq 2) {
+            $latestVersion = $latestPreRelease.tag_name
+            $updateType = "предрелизная"
+            $zipUrl = "https://github.com/Alexpotkin/Agent/archive/refs/tags/" + $latestPreRelease.tag_name + ".zip"
+
+            if (-not $zipUrl) {
+                throw "Не удалось найти URL для предрелизной версии."
+            }
+            Write-Host "Путь к файлу предрелизной версии: $zipUrl"
         }
         else {
-            $repoUrlApi = "https://api.github.com/repos/Alexpotkin/Agent/releases/latest"
-        }
+            $latestVersion = $latestRelease.tag_name
+            $updateType = "релизная"
+            $zipUrl = $latestRelease.zipball_url
 
-        $releaseData = Invoke-RestMethod -Uri $repoUrlApi -Method Get
-
-        foreach ($release in $releaseData) {
-            if (($updateSetting -eq 2 -and $release.prerelease) -or
-                ($updateSetting -ne 2 -and !$release.prerelease)) {
-                $latestVersion = $release.tag_name
-                
-                if ($latestVersion -ne $ver) {
-                    Debuging -param_debug $debug -debugmessage ("New version available. LOADING... - ($latestVersion)") -typemessage info -anyway_log $true
-                    
-                    # Load file
-                    $zipUrl = $release.zipball_url
-                    $zipPath = ".\update.zip"
-                    Invoke-WebRequest -Uri $zipUrl -OutFile $zipPath
-                    Debuging -param_debug $debug -debugmessage ("Loading file: - ($zipUrl)") -typemessage info -anyway_log $true
-                    
-                    # Unzip
-                    Expand-Archive -Path $zipPath -DestinationPath ".\temp" -Force
-                    Remove-Item $zipPath
-                    
-                    # Update
-                    Copy-Item -Path ".\temp\agent-$latestVersion\*" -Destination ".\" -Recurse -Force
-                    Remove-Item ".\temp" -Recurse -Force
-
-                    return $updateResult = 1
-                }
-                else {
-                    Debuging -param_debug $debug -debugmessage ("Script version is current - ($ver)") -typemessage info -anyway_log $true
-                    return $updateResult = 0
-                }
+            if (-not $zipUrl) {
+                throw "Не удалось найти URL для релизной версии."
             }
+        }
+        
+        $zipPath = ".\update.zip"
+        Invoke-WebRequest -Uri $zipUrl -OutFile $zipPath
+        Expand-Archive -Path $zipPath -DestinationPath ".\temp" -Force
+        Remove-Item $zipPath
+        
+        Copy-Item -Path ".\temp\agent-$latestVersion\*" -Destination ".\" - Recurse -Force
+        Remove-Item ".\temp" -Recurse -Force
+        return $updateResult = 1
+        
+        if ($latestVersion -eq $ver) {
+            Debuging -param_debug $debug -debugmessage ("Скрипт уже обновлен до версии - ($ver)") -typemessage info -anyway_log $true
+            return $updateResult = 0
         }
     }
     catch {
+        Write-Host "Произошла ошибка при выполнении обновления: $_"
         return $updateResult = 2
     }
 }

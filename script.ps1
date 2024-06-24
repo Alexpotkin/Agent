@@ -1,4 +1,4 @@
-﻿$global:ver = "0.3.5.3b"
+﻿$global:ver = "0.3.5.4b"
 $ProgrammName = "Agent"
 [bool]$errorflag = $false
 [bool]$warningflag = $false
@@ -282,8 +282,7 @@ if ($ini.main.update -eq "1" -or $ini.main.update -eq "2") {
     $updateResult = Update $ini $ver
 
     if ($updateResult -eq 1) {
-        Debuging -param_debug $debug -debugmessage ("Update downloaded! ") 
-        -typemessage completed -anyway_log $true
+        Debuging -param_debug $debug -debugmessage ("Update downloaded! ")-typemessage completed -anyway_log $true
         $text = "The update has been successfully completed!"
         SendmessageTelegram -message $text 
         SendServer -message $text 
