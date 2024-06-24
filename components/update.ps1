@@ -9,7 +9,7 @@ function global:Update {
     param($ini, $ver)
 
     $repoUrl = "https://github.com/Alexpotkin/Agent"         # URL GitHub
-    $updateSetting = $ini.update                              # Получаем значение из ini файла
+    $updateSetting = $ini.main.update                              # Получаем значение из ini файла
 
     try {
         if ($updateSetting -eq 2) {

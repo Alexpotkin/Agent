@@ -1,4 +1,4 @@
-﻿$global:ver = "0.3.4"
+﻿$global:ver = "0.3.5.1b"
 $ProgrammName = "Agent"
 [bool]$errorflag = $false
 [bool]$warningflag = $false
@@ -270,7 +270,7 @@ if (($ini.cobian.cobian -eq 1) -or ([int16]$ini.cobian.time -lt 1)) {
 }
 
 ####UPDATE####
-if ($updateSetting -eq "1" -or $updateSetting -eq "2") {
+if ($ini.main.update -eq "1" -or $ini.main.update -eq "2") {
     try {
         Debuging -param_debug $debug -debugmessage ("Checking the update...") -typemessage info -anyway_log $true
         .\components\update.ps1
