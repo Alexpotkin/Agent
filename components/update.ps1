@@ -22,14 +22,14 @@ function global:Update {
             if ($ver -eq $latestVersion) {
                 return  $updateResult = 0
             }
-            Debugging -param_debug $debug -debugmessage ("Experimental version found - " + $latestVersion) -typemessage completed -anyway_log $True
+            Debuging -param_debug $debug -debugmessage ("Experimental version found - " + $latestVersion) -typemessage completed -anyway_log $True
             $zipUrl = "https://github.com/Alexpotkin/Agent/archive/refs/tags/" + $latestPreRelease.tag_name + ".zip"
             if (-not ($zipUrl -match "^https?://")) {
                 throw "URL is not valid!"
                 return $updateResult = 2  #error
             }
             else {
-                Debugging -param_debug $debug -debugmessage ("Path to the pre-release version file: " + $zipUrl) -typemessage completed -anyway_log $true
+                Debuging -param_debug $debug -debugmessage ("Path to the pre-release version file: " + $zipUrl) -typemessage completed -anyway_log $true
             }
         }
         else {
@@ -37,14 +37,14 @@ function global:Update {
             if ($ver -eq $latestVersion) {
                 return  $updateResult = 0
             }
-            Debugging -param_debug $debug -debugmessage ("Update available - " + $latestVersion) -typemessage completed -anyway_log $True
+            Debuging -param_debug $debug -debugmessage ("Update available - " + $latestVersion) -typemessage completed -anyway_log $True
             $zipUrl = "https://github.com/Alexpotkin/Agent/archive/refs/tags/" + $latestRelease.tag_name + ".zip"
             if (-not ($zipUrl -match "^https?://")) {
                 throw "URL is not valid!"
                 return $updateResult = 2  #error
             }
             else {
-                Debugging -param_debug $debug -debugmessage ("Path to the release version file: " + $zipUrl) -typemessage completed -anyway_log $true
+                Debuging -param_debug $debug -debugmessage ("Path to the release version file: " + $zipUrl) -typemessage completed -anyway_log $true
             }
         }
         $zipPath = ".\update.zip"
@@ -58,7 +58,7 @@ function global:Update {
         if ($firstLine -match '(\d+(\.\d+){0,3}\w*)') {
             $updatedVersion = $matches[0]
             if ($latestVersion -eq $updatedVersion) {
-                Debugging -param_debug $debug -debugmessage ("Script successfully updated to version" + $updatedVersion)  -typemessage completed -anyway_log $true
+                Debuging -param_debug $debug -debugmessage ("Script successfully updated to version" + $updatedVersion)  -typemessage completed -anyway_log $true
                 Remove-Item ".\temp" -Recurse -Force
                 if ($ini.main.develop -eq 1) {
                     return $updateResult = 1
@@ -67,19 +67,18 @@ function global:Update {
                 return $updateResult = 1
             }
             else {
-                Debugging -param_debug $debug -debugmessage ("Script not updated. Current version - " + $updatedVersion)  -typemessage warning -anyway_log $true
+                Debuging -param_debug $debug -debugmessage ("Script not updated. Current version - " + $updatedVersion)  -typemessage warning -anyway_log $true
                 Remove-Item ".\temp" -Recurse -Force
                 return $updateResult = 2
             }
         }
         else {
-            Debugging -param_debug $debug -debugmessage ("Script header does not contain a version number")  -typemessage completed -anyway_log $true
+            Debuging -param_debug $debug -debugmessage ("Script header does not contain a version number")  -typemessage completed -anyway_log $true
         }
         return $updateResult = 2
-        
     }
     catch {
-        Debugging -param_debug $debug -debugmessage ("CATCH-($ModulName) $_ ") -typemessage warning -anyway_log $True
+        Debuging -param_debug $debug -debugmessage ("CATCH- +$ModulName + $_ ") -typemessage warning -anyway_log $True
         return $updateResult = 2
     }
 }
