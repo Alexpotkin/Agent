@@ -52,7 +52,7 @@ function global:Update {
         Expand-Archive -Path $zipPath -DestinationPath ".\temp" -Force
         Remove-Item $zipPath
         if ($ini.main.develop -ne 1) {
-            Copy-Item -Path ".\temp\agent-$latestVersion\*" -Destination
+            Copy-Item -Path ".\temp\agent-$latestVersion\*" -Destination ".\" -Recurse -Force
         }
         $firstLine = Get-Content -Path $fileScript -TotalCount 1
         if ($firstLine -match '(\d+(\.\d+){0,3}\w*)') {
