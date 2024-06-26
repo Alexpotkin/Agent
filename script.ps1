@@ -1,4 +1,4 @@
-﻿$global:ver = "0.3.5.1"
+$global:ver = "0.3.5.9b"
 $ProgrammName = "Agent"
 [bool]$errorflag = $false
 [bool]$warningflag = $false
@@ -270,7 +270,7 @@ if (($ini.cobian.cobian -eq 1) -or ([int16]$ini.cobian.time -lt 1)) {
 }
 
 ####UPDATE####
-if ($ini.main.update -eq "1") {
+if ($ini.main.update -eq "1" -or $ini.main.update -eq "2") {
     try {
         Debuging -param_debug $debug -debugmessage ("Checking the update...") -typemessage info -anyway_log $true
         .\components\update.ps1
@@ -281,15 +281,8 @@ if ($ini.main.update -eq "1") {
     #function update
     $updateResult = Update $ini $ver
 
-    if ($updateResult -eq 1) {
-        Debuging -param_debug $debug -debugmessage ("Update downloaded! ") 
-        -typemessage completed -anyway_log $true
-        $text = "The update has been successfully completed!"
-        SendmessageTelegram -message $text 
-        SendServer -message $text 
-    }
-    elseif ($updateResult -eq 2) {
-        Debuging -param_debug $debug -debugmessage ("ERROR updateted script!") -typemessage warning -anyway_log $true
+    if ($updateResult -eq 0) {
+        Debuging -param_debug $debug -debugmessage ("Обновление скрипта не требуется ") -typemessage info -anyway_log $true
     }
 }
 
