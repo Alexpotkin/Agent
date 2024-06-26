@@ -9,3 +9,5 @@ Returns:
 0 - Script version up to date
 2 - Error occurred during update
 #>
+$global:ver = "0.3.6"
+Добавлена возможность установить бета версию, в конфиге параметр update установить в = 2
