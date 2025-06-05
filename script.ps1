@@ -105,7 +105,6 @@ function SendServer {
         $message = "message is empty", $errorflag = $false, $warningflag = $false, $route = "/event"
     )
     if ($ini.main.telemetr -eq "0") {
-        Debuging -param_debug $debug -debugmessage ("Телеметрия отключена в файле конфигурации") -typemessage warning
         return
     }
     try {
@@ -203,7 +202,6 @@ catch {
 }
 
 ####FINDPATTERN####
-Debuging -param_debug $debug -debugmessage ("The task for checking the cobian log file is set - 1. go...") -typemessage info
 function Findpattern {
     # function pattern analizator
     param($filelog, $n, $time, $pattern, $debug)
@@ -251,7 +249,7 @@ function Findpattern {
 }
 
 ####COMPONENT COBIAN####
-if (($ini.cobian.cobian -eq 1) -and ([int16]$ini.cobian.time -lt 1)) {
+if ($ini.cobian.cobian -eq 1) {
     try {
         .\components\cobian.ps1 #connect global function 
     }
@@ -265,6 +263,20 @@ if (($ini.cobian.cobian -eq 1) -and ([int16]$ini.cobian.time -lt 1)) {
         $text = "ERROR " + $text  
         $errorflag = $true
     }
+    SendmessageTelegram -message $text -errorflag $errorflag
+    SendServer -message $text -errorflag $errorflag
+}
+
+####COMPONENT FRONTOL####
+if ($ini.frontol.frontol -eq 1) {
+    try {
+        .\components\frontol.ps1 #connect global function 
+    }
+    catch {
+        $text = "Error loading functions frontol.ps1"
+        Debuging -param_debug $debug -debugmessage $text -typemessage error
+    }
+    $text = frontol $ini
     SendmessageTelegram -message $text -errorflag $errorflag
     SendServer -message $text -errorflag $errorflag
 }
