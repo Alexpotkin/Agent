@@ -1,4 +1,4 @@
-$global:ver = "0.3.6.1b"
+﻿$global:ver = "0.3.5.9b"
 $ProgrammName = "Agent"
 [bool]$errorflag = $false
 [bool]$warningflag = $false
@@ -251,7 +251,7 @@ function Findpattern {
 }
 
 ####COMPONENT COBIAN####
-if (($ini.cobian.cobian -eq 1) -or ([int16]$ini.cobian.time -lt 1)) {
+if (($ini.cobian.cobian -eq 1) -and ([int16]$ini.cobian.time -lt 1)) {
     try {
         .\components\cobian.ps1 #connect global function 
     }
