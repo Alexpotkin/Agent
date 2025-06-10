@@ -277,8 +277,8 @@ if ($ini.frontol.frontol -eq 1) {
         Debuging -param_debug $debug -debugmessage $text -typemessage error
     }
     $text = frontol $ini
-    SendmessageTelegram -message $text -errorflag $errorflag
-    SendServer -message $text -errorflag $errorflag
+    SendmessageTelegram -message $text
+    # SendServer -message $text -errorflag $errorflag
 }
 
 ####UPDATE####

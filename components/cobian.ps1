@@ -19,5 +19,6 @@ function global:Cobian {
         $text, $errbackup, $errorpattern = Findpattern $filelog $n $time
         $text = "Добро пожаловать в Cobian Backup. Сервис успешно запущен!"
     }
-    return  $text, $errbackup, $errorpattern
+    $text = "MOD: " + [System.IO.Path]::GetFileNameWithoutExtension($MyInvocation.MyCommand.Name) + " | " + $text
+    return    $text, $errbackup, $errorpattern
 }
