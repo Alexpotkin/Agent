@@ -32,6 +32,7 @@ function global:Update {
 
         if ($isDevelop -ne 1) {
             Copy-Item -Path ".\temp\agent-$latestVersion\*" -Destination ".\" -Recurse -Force
+            Update-ConfigFile -configFilePath $configFilePath -defaultConfigFilePath $defaultConfigFilePath  # Обновление конфигурации
         }
         else {
             return 3  # Script off, developer mode
@@ -125,10 +126,7 @@ function global:Update {
 
         $zipUrl = "https://github.com/Alexpotkin/Agent/archive/refs/tags/$latestVersion.zip"
         Debuging -param_debug $debug -debugmessage ("Update available - " + $latestVersion) -typemessage completed -anyway_log $True
-
         Update-Module $zipUrl $latestVersion $ini.main.develop
-        Update-ConfigFile -configFilePath $configFilePath -defaultConfigFilePath $defaultConfigFilePath  # Обновление конфигурации
-
         return 1  # Обновление успешно
     }
     catch {
