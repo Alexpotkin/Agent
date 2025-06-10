@@ -10,9 +10,16 @@ function global:frontol {
         return  $ModulName + "ID_GROUP пустая или равна 0."
     }
     # База данных 
-    $dbServerName = "192.168.1.142:C:\BD\MAIN.gdb"
-    $dbUser = "SYSDBA"
-    $dbPass = "masterkey"
+    $dbServerName = $ini.frontol.dbServerName
+    $dbUser = $ini.frontol.dbUser
+    $dbPass = $ini.frontol.dbPass
+    # Проверка на существование  переменных
+    if ([string]::IsNullOrWhiteSpace($dbServerName) -or 
+        [string]::IsNullOrWhiteSpace($dbUser) -or 
+        [string]::IsNullOrWhiteSpace($dbPass)) {
+        Debuging -param_debug $debug -debugmessage ("DB Error " + $ModulName + " | Не заполнены параметры подключения к серверу!" ) -typemessage error
+        return
+    }
     [string]$szConnect = "Driver={Firebird/InterBase(r) driver};Dbname=$dbServerName;Pwd=$dbPass;CHARSET=WIN1251;UID=$dbUser" 
     $cnDB = New-Object System.Data.Odbc.OdbcConnection($szConnect)
     $dsDB = New-Object System.Data.DataSet
