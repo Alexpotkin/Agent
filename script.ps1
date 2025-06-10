@@ -294,7 +294,10 @@ if ($ini.main.update -eq "1" -or $ini.main.update -eq "2") {
     $updateResult = Update $ini $ver
 
     if ($updateResult -eq 0) {
-        Debuging -param_debug $debug -debugmessage ("Обновление скрипта отключено в файле конфигурации ") -typemessage info -anyway_log $true
+        Debuging -param_debug $debug -debugmessage ("Скрипт обновлен ") -typemessage info -anyway_log $true
+    }
+    if ($updateResult -eq 3) {
+        Debuging -param_debug $debug -debugmessage ("Включен режим разработчика, скрипт не будет обновлен! ") -typemessage info -anyway_log $true
     }
 }
 
