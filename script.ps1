@@ -1,4 +1,4 @@
-﻿$global:ver = "0.3.7.1b"
+﻿$global:ver = "0.3.6.10b"
 $ProgrammName = "Agent"
 [bool]$errorflag = $false
 [bool]$warningflag = $false
@@ -294,7 +294,7 @@ if ($ini.main.update -eq "1" -or $ini.main.update -eq "2") {
     $updateResult = Update $ini $ver
 
     if ($updateResult -eq 0) {
-        Debuging -param_debug $debug -debugmessage ("Обновление скрипта не требуется ") -typemessage info -anyway_log $true
+        Debuging -param_debug $debug -debugmessage ("Обновление скрипта отключено в файле конфигурации ") -typemessage info -anyway_log $true
     }
 }
 
